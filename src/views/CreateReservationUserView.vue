@@ -1,50 +1,51 @@
 <template>
-  <div class="reservation-box" :data-user="ID">
-    <div class="tabs">
-      <label class="tab tab-selected" data-gender="1" @click="tabSelected">Мужские</label>
-      <label class="tab" data-gender="0" @click="tabSelected">Женские</label>
+  <div class="horizonatal">
+    <div class="navigation-menu">
+      <button class="start-button" @click="$router.push('/profileUser')">← На главную</button>
+      <button class="center-button color"  >Создание брони</button>
     </div>
+    <div class="content">
+      <div class="reservation-box">
 
-    <div class="user-box">
-      <div class="column">
-        <input v-model="name" placeholder="Имя" style="display: block;">
-        <input v-model="phone" placeholder="Номер телефона" style="display: block">
-      </div>
-      <div class="column horizontal">
-        <div class="selection-previous" @click="decrementDate"><</div>
-        <div class="date-picker"><label v-html="reservationPeriod.date"></label></div>
-        <div class="selection-next" @click="incrementDate">></div>
-        <div class="spacer">-</div>
-        <div class="time-selector">
-          <masked-input v-model="reservationPeriod.startTime" mask="11:11" placeholder="00:00" />
-          <label>-</label>
-          <masked-input v-model="reservationPeriod.endTime" mask="11:11" placeholder="00:00" />
+
+        <div class="user-box">
+          <div class="column">
+            <span v-html="name"></span>
+            <span v-html="phone"></span>
+          </div>
+          <div class="column horizontal">
+            <div class="selection-previous" @click="decrementDate"><</div>
+            <div class="date-picker"><label v-html="reservationPeriod.date"></label></div>
+            <div class="selection-next" @click="incrementDate">></div>
+            <div class="spacer">-</div>
+            <div class="time-selector">
+              <masked-input v-model="reservationPeriod.startTime" mask="11:11" placeholder="00:00" />
+              <label>-</label>
+              <masked-input v-model="reservationPeriod.endTime" mask="11:11" placeholder="00:00" />
+            </div>
+
+          </div>
         </div>
-
+        <button class="create-reservation-button color" @click="createReservation">Создать бронь</button>
       </div>
     </div>
-    <button class="create-reservation-button color" @click="createReservation">Создать бронь</button>
   </div>
-
 </template>
 
 <script>
-
 import moment from "moment";
 import Vue from "vue";
 import MaskedInput from 'vue-masked-input';
 import axios from "axios";
 
 export default {
-  name: "Reservation",
-  props: {
-    ID: '',
-  },
+  name: "CreateReservationUserView",
   data() {
     return {
       offsetDays: 0,
       name: '',
       phone: '',
+      gender: " ",
       id: '',
       reservationPeriod: {
         date: moment().format("YYYY-MM-DD"),
@@ -57,22 +58,31 @@ export default {
   components:{
     MaskedInput
   },
+  mounted() {
+    this.Test();
+  },
   methods: {
-    tabSelected: async function (event) {
-      let query = `.reservation-box[data-user='${this.$props.ID}'] label.tab`;
-      let tabs = document.querySelectorAll(query);
+    Test() {
+      console.log(window.apiUrl);
+      let token = localStorage.getItem("jwt_token");
+      const config = {
+        headers: { Authorization: `Bearer ${token}` },
+      };
 
-      console.log(tabs);
+      axios.post(`${window.apiUrl}/auth/checkToken`, {}, config).then(response => {
+        // Token is valid, so continue
+        console.log(response)
+        this.name = response.data.data.user.name
+        this.phone = response.data.data.user.login
+        this.gender = response.data.data.user.gender
+        console.log(this.name)
+      }).catch(error => {
+        // There was an error so redirect
+        console.log("Обидно")
+      })
 
-      for (const tab of tabs) {
-        //console.log(tab);
-        tab.classList.remove('tab-selected');
-      }
-      event.target.classList.add('tab-selected');
-
-      this.selectedGender = event.target.getAttribute('data-gender');
-      console.log(this.selectedGender)
     },
+
     decrementDate: function () {
       this.offsetDays++;
       this.reservationPeriod.date = moment(Date.now()).subtract(this.offsetDays, 'days').format("YYYY-MM-DD");
@@ -115,7 +125,7 @@ export default {
           data: {
             start_time: startTime,
             end_time: endTime,
-            gender: this.selectedGender,
+            gender: this.gender,
             name: this.name,
             phone: this.phone,
           },
@@ -138,8 +148,6 @@ export default {
 }
 </script>
 
-<style>
-.color{
-  background-color: #BDE0FF;
-}
+<style scoped>
+
 </style>

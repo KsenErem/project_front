@@ -4,14 +4,20 @@ import LoginView from "../views/LoginView";
 import AboutView from "../views/AboutView"
 import HomePage from "../views/HomePage";
 import CreateReservationView from "../views/CreateReservationView";
+import HomePageUser from "@/views/HomePageUser";
+import Contacts from "../views/Contacts"
+import ProfileUser from "../views/ProfileUser"
+import SignupView from "../views/SignupView"
+import CreateReservationUserView from "../views/CreateReservationUserView"
 
 Vue.use(VueRouter)
 
 import axios from "axios";
 
+
 const routes = [
   {
-    path: '/',
+    path: '/homeAdmin',
     name: 'home',
     component: HomePage,
     beforeEnter: (to, from, next) => {
@@ -22,6 +28,36 @@ const routes = [
     path: '/login',
     name: 'login',
     component: LoginView
+  },
+  {
+    path: '/signup',
+    name: 'signup',
+    component: SignupView
+  },
+  {
+    path: '/',
+    name: 'homeUser',
+    component: HomePageUser
+  },
+  {
+    path: '/about',
+    name: 'aboutUs',
+    component: AboutView
+  },
+  {
+    path: '/contacts',
+    name: 'contacts',
+    component: Contacts
+  },
+  {
+    path: '/profileUser',
+    name: 'profileUser',
+    component: ProfileUser
+  },
+  {
+    path: '/createReservationUser',
+    name: 'createReservationUser',
+    component: CreateReservationUserView
   },
   {
     path: '/createReservation',

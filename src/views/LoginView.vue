@@ -21,8 +21,13 @@
                   <label class="form-label" for="typePasswordX">Пароль</label>
                 </div>
 
+
                 <button class="btn btn-outline-light btn-lg px-5" @click="AuthUser">Вход</button>
 
+                <div class="form-outline mb-6 px-5 ">
+                  <label class="form-label mb-6">У вас еще нет аккаунта?</label>
+                  <a href="/signup" type="button" class="btn btn-outline-light btn-lg px-5">Регистрация</a>
+                </div>
 
               </div>
 
@@ -84,9 +89,17 @@ export default {
         let data = result.data.data;
         console.log(result);
         if (result.status === 200) {
-          console.log(`here`);
-          localStorage.setItem("jwt_token", data.token);
-          window.location.href = "/";
+          if(data.gender == 2){
+            console.log(`here`);
+            localStorage.setItem("jwt_token", data.token);
+            window.location.href = "/homeAdmin";
+          }
+          else {
+            console.log(`here`);
+            localStorage.setItem("jwt_token", data.token);
+            window.location.href = "/profileUser";
+          }
+
         }
         console.log(localStorage.getItem("jwt_token"));
       } catch (e) {

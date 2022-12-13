@@ -1,19 +1,19 @@
-# bathhouse_front
+Реализовано: 
+1. Создана навигация по сайту (Header.vue и Footer.vue)
+В Header есть кнопка, которая меняется в зависимости от статуса авторизации.
+2. Созданы страницы:
+- Главная страница - HomePageUser.vue: 
+немного информации о бассейне и кнопка «Зарегистрироваться», которая ведет на страницу регистрации
+- О нас - AboutView.vue: 
+немного информации о бассейне 
+- Контакты - Contacts.vue: 
+просмотр адреса в яндекс картах
+- Профиль администратора - HomePage.vue: 
+доступны 2 таблицы с бронями: женские и мужские, добавление и удаление брони
+- Профиль пользователя - ProfileUser.vue: 
+выводится имя и номер телефона пользователя, доступно создание брони, выбрав дату и время, таблица со всеми бронями по гендеру пользователя
+- Авторизация - LoginView.vue
+- Регистрация - SignupView.vue
 
-## Project setup
-```
-npm install
-```
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
 
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).

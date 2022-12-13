@@ -1,68 +1,118 @@
 <template>
-  <div class="horizonatal">
+  <div class="profile">
     <Header />
-    <div class="navigation-end-menu">
-      <button class="end-button color" @click="$router.push('/createReservation')">Создать бронь</button>
-    </div>
-    <div style="display: flex; justify-content: center">
-      <div style="width: 80%; text-align: justify; flex-wrap: nowrap;" class="content">
-        <div class="tabs">
-          <label class="tab tab-selected" data-gender="1" @click="tabSelected">Мужские</label>
-          <label class="tab" data-gender="0" @click="tabSelected">Женские</label>
+
+    <div class="container mt-5 d-flex justify-content-center">
+      <div class="card p-3">
+        <div class="d-flex align-items-center">
+          <div class="image">
+            <img src="https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=500&q=80" class="rounded" width="155" >
+          </div>
+          <div class="ml-3 w-100">
+            <h4 class="mb-0 mt-0"><span v-html="name"></span></h4>
+            <div class="button mt-2 d-flex flex-row align-items-center">
+              <p>Телефон: <span v-html="number"></span></p>
+            </div>
+            <div class="button mt-2 d-flex flex-row align-items-center">
+              <p>Запись: </p><p>Время и дата записи</p>
+            </div>
+          </div>
         </div>
       </div>
     </div>
-    <div class="selector" style="display: flex; justify-content: center; margin-top: 20px">
-      <div class="selection-previous" @click="decrementDate"><</div>
-      <div class="date-picker color" :class="{today: this.offsetDays == 0}"><label v-html="selectedDate"> </label></div>
-      <div class="selection-next" @click="incrementDate">></div>
-    </div>
 
-    <div class="table-wrapper">
+    <div class="horizonatal">
+      <div class="navigation-end-menu">
+        <button class="end-button color" @click="$router.push('/createReservationUser')">Создать бронь</button>
+      </div>
+      <div class="selector" style="display: flex; justify-content: center; margin-top: 20px">
+        <div class="selection-previous" @click="decrementDate"><</div>
+        <div class="date-picker color" :class="{today: this.offsetDays == 0}"><label v-html="selectedDate"> </label></div>
+        <div class="selection-next" @click="incrementDate">></div>
+      </div>
 
-      <table>
+      <div class="table-wrapper">
 
-        <tr>
+        <table>
 
-        </tr>
+          <tr>
 
-      </table>
+          </tr>
+
+        </table>
+      </div>
     </div>
     <Footer />
   </div>
+
+
+
 </template>
 
 <script>
-import '../css/index.css';
-import '@fullcalendar/core/vdom' // solves problem with Vite
-import FullCalendar from '@fullcalendar/vue'
-import dayGridPlugin from '@fullcalendar/daygrid'
-import interactionPlugin from '@fullcalendar/interaction'
-import resourceTimelinePlugin from '@fullcalendar/resource-timeline';
-// @ is an alias to /src
-import Vue from "vue";
-import moment from "moment";
-import Modal from '../components/Modal';
 import Header from '@/components/Header.vue'
-import Footer from "@/components/Footer";
+import VCalendar from 'v-calendar';
+// Import Vue
+import Vue from 'vue';
 
+// Import VueScheduler
+import VueScheduler from 'v-calendar-scheduler';
+import Footer from "@/components/Footer";
+import axios from "axios";
+import moment from "moment/moment";
+import Modal from "@/components/Modal";
+
+// Import styles
+
+
+Vue.use(VueScheduler);
 export default {
-  name: 'HomePage',
+  name: "ProfileUser",
   components: {
     Header,
-    Footer,
-    FullCalendar
+    Footer
   },
-  data() {
+  props: {
+    msg: String
+  },
+  data: function(){
     return {
+      name: "",
+      number: "",
+      gender: " ",
       login: '',
       password: '',
-      selectedGender: '1',
       selectedDate: moment().format("YYYY-MM-DD"),
       offsetDays: 0,
     }
   },
-  methods: {
+  mounted() {
+    console.log(`vue is `, Vue.$api);
+    this.Test();
+    this.createTable();
+  },
+  methods:{
+    Test() {
+      console.log(window.apiUrl);
+      let token = localStorage.getItem("jwt_token");
+      const config = {
+        headers: { Authorization: `Bearer ${token}` },
+      };
+
+      axios.post(`${window.apiUrl}/auth/checkToken`, {}, config).then(response => {
+        // Token is valid, so continue
+        this.authStatus = true;
+        console.log(response)
+        this.name = response.data.data.user.name
+        this.number = response.data.data.user.login
+        this.gender = response.data.data.user.gender
+        console.log(this.name)
+      }).catch(error => {
+        // There was an error so redirect
+        this.authStatus = false
+      })
+
+    },
     decrementDate: function () {
       this.offsetDays++;
       this.selectedDate = moment(Date.now()).subtract(this.offsetDays, 'days').format("YYYY-MM-DD");
@@ -73,19 +123,9 @@ export default {
       this.selectedDate = moment(Date.now()).subtract(this.offsetDays, 'days').format("YYYY-MM-DD");
       this.createTable();
     },
-    tabSelected: async function (event) {
-      let tabs = document.querySelectorAll(".tab");
-      console.log(tabs);
-      for (const tab of tabs) {
-        tab.classList.remove('tab-selected');
-      }
-      event.target.classList.add('tab-selected');
-      this.selectedGender = event.target.getAttribute('data-gender');
-      this.createTable();
 
-    },
     createTable: async function () {
-      let gender = this.selectedGender;
+      let gender = this.gender;
       try {
         let result = await Vue.axios({
           method: 'get',
@@ -132,7 +172,7 @@ export default {
 
         result = await Vue.axios({
           method: 'get',
-          url: `${window.apiUrl}/reservations/?start_time=${this.selectedDate} 08:00:00&end_time=${moment(Date.now()).subtract(this.offsetDays - 1, 'days').format("YYYY-MM-DD")} 03:00:00&gender=${this.selectedGender}"`,
+          url: `${window.apiUrl}/reservations/?start_time=${this.selectedDate} 08:00:00&end_time=${moment(Date.now()).subtract(this.offsetDays - 1, 'days').format("YYYY-MM-DD")} 03:00:00&gender=${this.gender}"`,
           headers: {
             "Authorization": `Bearer ${localStorage.getItem("jwt_token")}`
           },
@@ -214,12 +254,11 @@ export default {
                 "Authorization": `Bearer ${localStorage.getItem("jwt_token")}`
               },
             }).catch(error => {
-                console.log(`error here`, error);
+              console.log(`error here`, error);
             });
 
             let data = result.data.data;
 
-            this.$modal.show(Modal, {data: data, createTableFunc: this.createTable}, {adaptive: true});
           })
 
 
@@ -247,17 +286,63 @@ export default {
         parent.removeChild(parent.firstChild);
       }
     },
-  },
-  mounted: function () {
-    console.log(`vue is `, Vue.$api)
-    this.createTable();
+
   }
 
 }
+
 </script>
 
 <style>
-.color{
+@import 'v-calendar-scheduler/lib/main.css';
+body{
+  border-radius: 10px;
+
+}
+
+.profile{
+  background-size: 100%;
+}
+
+.card{
+  width: 500px;
+  border: none;
+  border-radius: 10px;
+
   background-color: #BDE0FF;
 }
+
+
+
+.stats{
+
+  background: #000000 !important;
+
+  color: #000 !important;
+}
+.articles{
+  font-size:10px;
+  color: #a1aab9;
+}
+.number1{
+  font-weight:500;
+}
+.followers{
+  font-size:10px;
+  color: #a1aab9;
+
+}
+.number2{
+  font-weight:500;
+}
+.rating{
+  font-size:10px;
+  color: #a1aab9;
+}
+.number3{
+  font-weight:500;
+}
+
+
+
 </style>
